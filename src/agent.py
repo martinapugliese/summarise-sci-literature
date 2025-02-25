@@ -2,11 +2,15 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent
 from inspect import cleandoc
 
-from constants import GEMINI_MODEL_ID
-from get_arxiv_papers import get_latest_day_papers, download_papers
+from constants import GEMINI_2_FLASH_MODEL_ID
+from utils import get_latest_day_papers, download_papers, get_category_papers
 
 
-SYSTEM_PROMPT = "Be concise, reply with one sentence."
+SYSTEM_PROMPT = cleandoc(
+    """
+    You are an experienced reader of academic literature and
+    an expert in distilling important findings in a way that is understandable and clear.
+    """)
 
 
 class PaperInfo(BaseModel):
@@ -27,25 +31,28 @@ prompt = cleandoc(
 
 def main():
 
-    # retrieve latest day papers info
-    paper_metadata = get_latest_day_papers()
+    # # retrieve latest day papers info
+    # paper_metadata = get_latest_day_papers()
 
-    if paper_metadata is not None:
+    # if paper_metadata is not None:
 
-        # download papers locally
-        download_papers(paper_metadata)
+    #     # download papers locally
+    #     download_papers(paper_metadata)
 
-        # run the agent
-        agent = Agent(  
-            GEMINI_MODEL_ID,
-            system_prompt=SYSTEM_PROMPT,
-            result_type=PaperInfo
-        )
+    #     # run the agent
+    #     agent = Agent(  
+    #         GEMINI_2_FLASH_MODEL_ID,
+    #         system_prompt=SYSTEM_PROMPT,
+    #         result_type=PaperInfo
+    #     )
 
-        result = agent.run_sync(prompt)
-        print(result)
+    #     result = agent.run_sync(prompt)
+    #     print(result)
 
-        return result
+    #     return result
+
+    content = get_category_papers('cs.AI')
+    print(content)
                 
 
 if __name__ == "__main__":

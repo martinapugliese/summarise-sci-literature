@@ -6,14 +6,26 @@ import re
 import os
 
 
-def get_latest_day_papers():
+def get_category_papers(arxiv_category):
+    base_url = 'http://export.arxiv.org/api/query?'
+
+    # Search parameters
+    search_query = f'cat:{arxiv_category}'
+    start = 0            
+    max_results = 5
+
+    r = requests.get(f"{base_url}search_query={search_query}&start={start}&max_results={max_results}")
+
+    return r.content
+
+def get_latest_day_papers(arxiv_category):
     """
-    Parse ArXiv page for latest day's AI papers
+    Parse ArXiv page for latest day's papers for a certain ArXiv class.
     TODO do via API
     """
     
     # this is the URL for all, so no need to paginate
-    webpage = "https://arxiv.org/list/cs.AI/recent?skip=0&show=2000"
+    webpage = f"https://arxiv.org/list/{arxiv_category}/recent?skip=0&show=2000"
 
     r = requests.get(webpage)
     if r.status_code != 200:
