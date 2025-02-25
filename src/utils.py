@@ -82,7 +82,7 @@ def download_papers(paper_metadata, output_dir='pdfs'):
     """
     Download all papers locally
     """
-    os.mkdir(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
 
     i = 0
     for id_, url_ in paper_metadata.items():
