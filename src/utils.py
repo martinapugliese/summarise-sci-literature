@@ -1,35 +1,38 @@
-import requests
-import urllib.request as urllib_req
-from bs4 import BeautifulSoup
-
-import re
 import os
+import re
+import urllib.request as urllib_req
+
+import requests
+from bs4 import BeautifulSoup
 
 
 def get_category_papers(arxiv_category):
-    base_url = 'http://export.arxiv.org/api/query?'
+    base_url = "http://export.arxiv.org/api/query?"
 
     # Search parameters
-    search_query = f'cat:{arxiv_category}'
-    start = 0            
+    search_query = f"cat:{arxiv_category}"
+    start = 0
     max_results = 5
 
-    r = requests.get(f"{base_url}search_query={search_query}&start={start}&max_results={max_results}")
+    r = requests.get(
+        f"{base_url}search_query={search_query}&start={start}&max_results={max_results}"
+    )
 
     return r.content
+
 
 def get_latest_day_papers(arxiv_category):
     """
     Parse ArXiv page for latest day's papers for a certain ArXiv class.
     TODO do via API
     """
-    
+
     # this is the URL for all, so no need to paginate
     webpage = f"https://arxiv.org/list/{arxiv_category}/recent?skip=0&show=2000"
 
     r = requests.get(webpage)
     if r.status_code != 200:
-        return 
+        return
 
     # initialise the parser
     soup = BeautifulSoup(r.content, "html.parser")
@@ -38,13 +41,13 @@ def get_latest_day_papers(arxiv_category):
     latest_day_str = soup.find_all("h3")[0].text
 
     # match what's this latest day
-    day = latest_day_str.split('(')[0]
+    day = latest_day_str.split("(")[0]
 
     # and the total number of entries for that day
-    match = re.search(r'of \d+ entries', latest_day_str)
+    match = re.search(r"of \d+ entries", latest_day_str)
     if match:
-        n_entries = int(match.group().split(' ')[1])
-        print(day, ' - ', n_entries, 'papers')
+        n_entries = int(match.group().split(" ")[1])
+        print(day, " - ", n_entries, "papers")
     else:
         print("Failed to isolate latest day's info")
 
@@ -66,19 +69,19 @@ def get_latest_day_papers(arxiv_category):
 
     paper_titles = []
     for title_div in paper_title_divs:
-        paper_titles.append(title_div.contents[1].split('\n')[1].lstrip())
+        paper_titles.append(title_div.contents[1].split("\n")[1].lstrip())
 
     len(paper_urls), len(paper_ids), len(paper_links), len(paper_titles)
 
     # create json linking ID and URL
-    paper_metadata = {paper_ids[i]: {'url': paper_urls[i]} 
-                      for i in range(10)   # just testing with 10
-                      }
+    paper_metadata = {
+        paper_ids[i]: {"url": paper_urls[i]} for i in range(10)  # just testing with 10
+    }
 
     return paper_metadata
 
 
-def download_papers(paper_metadata, output_dir='pdfs'):
+def download_papers(paper_metadata, output_dir="pdfs"):
     """
     Download all papers locally
     """
@@ -87,7 +90,7 @@ def download_papers(paper_metadata, output_dir='pdfs'):
     i = 0
     for id_, url_ in paper_metadata.items():
         try:
-            urllib_req.urlretrieve(url_['url'], f"{output_dir}/{id_}.pdf")
+            urllib_req.urlretrieve(url_["url"], f"{output_dir}/{id_}.pdf")
         except Exception as e:
             print(f"Failed to download {id_} due to {e}")
             continue
