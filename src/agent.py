@@ -1,23 +1,26 @@
-from pydantic import BaseModel, Field
-from pydantic_ai import Agent
 from inspect import cleandoc
 
-from constants import GEMINI_2_FLASH_MODEL_ID
-from utils import get_latest_day_papers, download_papers, get_category_papers
+from pydantic import BaseModel, Field
+from pydantic_ai import Agent
 
+from constants import GEMINI_2_FLASH_MODEL_ID
+from utils import download_papers, get_category_papers, get_latest_day_papers
 
 SYSTEM_PROMPT = cleandoc(
     """
     You are an experienced reader of academic literature and
     an expert in distilling important findings in a way that is understandable and clear.
-    """)
+    """
+)
 
 
 class PaperInfo(BaseModel):
     title: str = Field(description="Title of the paper")
     summary: str = Field(description="Summary of the paper, in 3 lines")
-    examples: list[str] = Field(description="Relevant examples aiding comprehension, taken from the paper, if there are.")
-    category: str = Field(description='Category of the paper')
+    examples: list[str] = Field(
+        description="Relevant examples aiding comprehension, taken from the paper, if there are."
+    )
+    category: str = Field(description="Category of the paper")
 
 
 prompt = cleandoc(
@@ -26,7 +29,8 @@ prompt = cleandoc(
     For the summary, be concise and avoid obscure jargon.
     If there are valuable examples that aid understanding, report them in a nutshell.
     For the category, think about what the results refer to, e.g. cognitive science, medicine, foundational AI etc.
-    """)
+    """
+)
 
 
 def main():
@@ -40,7 +44,7 @@ def main():
     #     download_papers(paper_metadata)
 
     #     # run the agent
-    #     agent = Agent(  
+    #     agent = Agent(
     #         GEMINI_2_FLASH_MODEL_ID,
     #         system_prompt=SYSTEM_PROMPT,
     #         result_type=PaperInfo
@@ -51,9 +55,9 @@ def main():
 
     #     return result
 
-    content = get_category_papers('cs.AI')
+    content = get_category_papers("cs.AI")
     print(content)
-                
+
 
 if __name__ == "__main__":
     main()
