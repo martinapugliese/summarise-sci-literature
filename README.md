@@ -13,3 +13,6 @@ Just playing around for now
  - Create virtual env
  - ```pip install .[dev]'''
  - ```pre-commit install'''
+
+# TODO
+Installation, API keys
