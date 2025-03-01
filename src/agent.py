@@ -35,13 +35,13 @@ prompt = cleandoc(
 
 def main():
 
-    # # retrieve latest day papers info
-    # paper_metadata = get_latest_day_papers()
+    # retrieve latest day papers info
+    paper_metadata = get_latest_day_papers()
 
-    # if paper_metadata is not None:
+    if paper_metadata is not None:
 
-    #     # download papers locally
-    #     download_papers(paper_metadata)
+        # download papers locally
+        download_papers(paper_metadata)
 
     #     # run the agent
     #     agent = Agent(
@@ -54,9 +54,6 @@ def main():
     #     print(result)
 
     #     return result
-
-    content = get_category_papers("cs.AI")
-    print(content)
 
 
 if __name__ == "__main__":

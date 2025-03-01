@@ -7,6 +7,12 @@ from bs4 import BeautifulSoup
 
 
 def get_category_papers(arxiv_category):
+    """
+    Get papers from a chosen ArXiv category by querying the ArXiv API.
+    Input: ArXiv category (e.g. "cs.AI")
+    Output: API response content
+    """
+
     base_url = "http://export.arxiv.org/api/query?"
 
     # Search parameters
@@ -21,26 +27,25 @@ def get_category_papers(arxiv_category):
     return r.content
 
 
-def get_latest_day_papers(arxiv_category):
+def get_latest_day_papers(arxiv_category="cs.AI"):
     """
-    Parse ArXiv page for latest day's papers for a certain ArXiv class.
-    TODO do via API
+    Parse ArXiv page for latest day's papers for a chosen ArXiv category.
+    Input: ArXiv category (default "cs.AI")
+    Output: dictionary {paper_id: paper_url}
     """
 
-    # this is the URL for all, so no need to paginate
+    # URL for all papers in the category
     webpage = f"https://arxiv.org/list/{arxiv_category}/recent?skip=0&show=2000"
 
     r = requests.get(webpage)
     if r.status_code != 200:
         return
 
-    # initialise the parser
+    # initialise parser
     soup = BeautifulSoup(r.content, "html.parser")
 
-    # pick the phrasing of the most recent day
+    # pick most recent day info
     latest_day_str = soup.find_all("h3")[0].text
-
-    # match what's this latest day
     day = latest_day_str.split("(")[0]
 
     # and the total number of entries for that day
@@ -51,46 +56,44 @@ def get_latest_day_papers(arxiv_category):
     else:
         print("Failed to isolate latest day's info")
 
-    # now find the URLs to these papers for the latest day only (up to n_entries as per above)
+    # find the URLs to these papers for the latest day only (up to n_entries)
     paper_links = soup.find_all("a", {"title": "Download PDF"})[:n_entries]
 
-    # Extract the paper IDs and links
+    # extract paper IDs and URLs
     paper_ids, paper_urls = [], []
     for link in paper_links:
         paper_url = "https://arxiv.org" + link["href"]
         paper_id = link["href"].split("/")[-1].split("v")[0]  # Extract the ID
-
         paper_ids.append(paper_id)
         paper_urls.append(paper_url)
 
-    # separately, find all titles (this is due to how the DOM is structured)
-    # they'll appear in the same order so order counts
+    # find all titles, which follow the same order
     paper_title_divs = soup.find_all("div", {"class": "list-title mathjax"})[:n_entries]
 
     paper_titles = []
     for title_div in paper_title_divs:
         paper_titles.append(title_div.contents[1].split("\n")[1].lstrip())
 
-    len(paper_urls), len(paper_ids), len(paper_links), len(paper_titles)
-
     # create json linking ID and URL
-    paper_metadata = {
-        paper_ids[i]: {"url": paper_urls[i]} for i in range(10)  # just testing with 10
-    }
+    paper_metadata = {paper_ids[i]: paper_urls[i] for i in range(len(paper_ids))}
 
     return paper_metadata
 
 
 def download_papers(paper_metadata, output_dir="pdfs"):
     """
-    Download all papers locally
+    Given a dict of paper IDs and URLs, download them locally.
     """
-    os.makedirs(output_dir, exist_ok=True)
+
+    # if output directory exists, delete it with all content
+    if os.path.exists(output_dir):
+        os.system(f"rm -rf {output_dir}")
+    os.makedirs(output_dir)
 
     i = 0
     for id_, url_ in paper_metadata.items():
         try:
-            urllib_req.urlretrieve(url_["url"], f"{output_dir}/{id_}.pdf")
+            urllib_req.urlretrieve(url_, f"{output_dir}/{id_}.pdf")
         except Exception as e:
             print(f"Failed to download {id_} due to {e}")
             continue
