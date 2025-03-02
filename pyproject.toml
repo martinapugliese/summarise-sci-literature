@@ -12,7 +12,12 @@ dependencies = [
   "pydantic",
   "pydantic-ai",
   "requests",
-  "beautifulsoup4"
+  "beautifulsoup4",
+  "pandas",
+  "lxml",
+  "tabulate",
+  "pymupdf",
+  "feedparser"
 ]
 requires-python = ">=3.11"
 

@@ -1,14 +1,12 @@
 import logging
-import os
 import sys
 from inspect import cleandoc
 
-import pymupdf
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent
+from pydantic_ai import Agent, Tool
 
 from constants import GEMINI_2_FLASH_MODEL_ID
-from utils import download_papers, get_category_paper_pdf_links
+from utils import get_article, query_articles_list
 
 logger = logging.getLogger(__name__)
 
@@ -21,28 +19,35 @@ SYSTEM_PROMPT = cleandoc(
 )
 
 
-class PaperInfo(BaseModel):
-    title: str = Field(description="Title of the paper")
-    summary: str = Field(description="Summary of the paper, in 3 lines")
-    examples: list[str] = Field(
-        description="Relevant examples aiding comprehension, taken from the paper, if there are."
+class GeneralResponse(BaseModel):
+    response: str = Field(description="The response to the query or question asked")
+    article_list: list[str] = Field(
+        description="The list of articles urls you used to answer to the question."
     )
-    category: str = Field(description="Category of the paper")
 
 
 PROMPT_TEMPLATE = cleandoc(
     """You are given a paper on AI.
-    Parse its title, summarise its results, extract examples and produce a category.
-    For the summary, be concise and avoid obscure jargon.
-    If there are valuable examples that aid understanding, report them in a nutshell.
-    For the category, think about what the results refer to, e.g. cognitive science, medicine, foundational AI etc.
+    Answer the following question by search on axiv and looking at the articles information.
+    If needed, access directly the articles you think are important to answer the question.
+    Try to be smart in the way you query and access article and limit the number of article searches
+    and article accesses.
+    Be as concise as possible in the answer.
 
-    This is the paper text:
-    {text}
+    This is the question:
+    {question}
     """
 )
 
-import json
+agent = Agent(
+    GEMINI_2_FLASH_MODEL_ID,
+    system_prompt=SYSTEM_PROMPT,
+    result_type=GeneralResponse,
+    tools=[
+        Tool(query_articles_list, takes_ctx=False),
+        Tool(get_article, takes_ctx=False),
+    ],
+)
 
 
 def main():
@@ -51,36 +56,13 @@ def main():
 
     logging.info("Starting the agent...")
 
-    # get latest max_results in category
-    papers = get_category_paper_pdf_links(max_results=300)
-
-    # download papers
-    download_papers(papers)
-
-    # read each paper and send to agent
-    # TODO use papers data above instead
-    for fn in os.listdir("pdfs"):
-
-        paper_id = fn.split(".pdf")[0]
-        logging.info(f"Processing paper {paper_id}...")
-
-        # read text content of PDF
-        pdf_path = f"pdfs/{paper_id}.pdf"
-        pdf = pymupdf.open(pdf_path)
-        text = ""
-        for page in pdf:
-            text += page.get_text()
-        pdf.close()
-
-        prompt = PROMPT_TEMPLATE.format(text=text)
-
-        # run the agent
-        agent = Agent(
-            GEMINI_2_FLASH_MODEL_ID, system_prompt=SYSTEM_PROMPT, result_type=PaperInfo
+    result = agent.run_sync(
+        PROMPT_TEMPLATE.format(
+            question="What is the relation between context length and accuracy for large language models?"
         )
+    )
 
-        result = agent.run_sync(prompt)
-        print(result)  # TODO build file from this data
+    print(result)
 
 
 if __name__ == "__main__":
