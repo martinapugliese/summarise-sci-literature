@@ -24,3 +24,5 @@ arxiv-llm-agent/
 
 #.vscode/
 /.vscode
+
+*.egg-info/
