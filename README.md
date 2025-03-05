@@ -14,5 +14,9 @@ Just playing around for now
  - ```pip install .[dev]'''
  - ```pre-commit install'''
 
+# How to run
+
+Run ```python app.py''' be sure to have GEMINI_API_KEY as environment variable.
+
 # TODO
 Installation, API keys
