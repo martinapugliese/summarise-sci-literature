@@ -41,11 +41,10 @@ SYSTEM_PROMPT_QUESTION = cleandoc(
 
     Answer any question by searching on arXiv and looking at information within the papers.
     If needed, access directly the papers you think are important to answer the question.
-    Try to be smart in the way you query and access papers
-    and limit the number of paper searches accesses.
+    Search only once and access few papers for each question.
 
     Quote the papers you used to answer.
 
-    If you don't find an answer with 20 papers, respond with a message saying that you couldn't find an answer.
+    If you don't find the answer, say you did not find relevant information.
     """
 )
