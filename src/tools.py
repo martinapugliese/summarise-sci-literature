@@ -17,15 +17,8 @@ def choose_category(topic: str):
     return categories
 
 
-def summarise_article(article: str):
-    """
-    Summarise the content of an article.
-    Args:
-        article: the article content
-    """
-
-
-def query_articles_list(
+# TODO this and next could be collated into one function
+def search_articles(
     query: str = "cs.AI",
     sortby: str = "submittedDate",
     prefix: str = "cat",
@@ -65,6 +58,7 @@ def query_articles_list(
 
     search_query = f"{prefix}:{query}"
 
+    # TODO this can keep searching forever, handle this
     url = (
         f"{base_url}search_query={search_query}&start={start}&max_results={max_results}"
     )
@@ -91,44 +85,40 @@ def query_articles_list(
     return markdown
 
 
-def query_recent_articles(
+def retrieve_recent_articles(
     category: str = "cs.AI",
-    start: int = 0,
-    max_results: int = 20,
 ):
     base_url = "http://export.arxiv.org/api/query?"
 
     search_query = f"cat:{category}"
-    url = (
-        f"{base_url}search_query={search_query}&start={start}&max_results={max_results}"
-    )
+    url = f"{base_url}search_query={search_query}&start=0&max_results=5"  # TODO make it pull up until it reaches max for day?
     url += f"&sortBysubmittedDate&sortOrder=descending"
     print("*** url:", url)
 
-    res = requests.get(url, timeout=360)
-    if not res.ok:
-        articles = "No Results"
+    response = requests.get(url, timeout=360)
+    if not response.ok:
+        df_articles = pd.DataFrame()  # no results, TODO needs to be handled
     else:
-        articles = feedparser.parse(res.content)["entries"]
-        articles = pd.DataFrame(articles)[["id", "published", "title"]]
-        articles.id = articles.id.apply(lambda s: s.replace("/abs/", "/pdf/"))
-        articles = articles.to_markdown(index=False)
+        articles_list = feedparser.parse(response.content)["entries"]
+        df_articles = pd.DataFrame(articles_list)[
+            ["id", "published", "title"]
+        ]  # cols are from the Atom feed
+        print(df_articles)
+        df_articles["url"] = df_articles["id"].apply(
+            lambda s: s.replace("/abs/", "/pdf/")
+        )
 
-    markdown = f"""
-        ---{category}---
-        {articles}
-        -------------
-    """
-
-    return markdown
+    return df_articles.to_markdown(index=False)
 
 
 async def get_article(url: str) -> str:
     """
-    Opens an article using its pdf url and reads its content.
+    Opens an article using its URL (PDF version) and returns its text content.
     Args:
         url: the article arXiv URL
     """
+
+    print("**** article url:", url)
 
     res = requests.get(url, timeout=360)
     if not res.ok:

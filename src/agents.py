@@ -6,8 +6,8 @@ from prompts import SYSTEM_PROMPT_QUESTION, SYSTEM_PROMPT_SUMMARY
 from tools import (
     choose_category,
     get_article,
-    query_articles_list,
-    query_recent_articles,
+    retrieve_recent_articles,
+    search_articles,
 )
 
 
@@ -33,12 +33,28 @@ class CategoryResponse(BaseModel):
     )
 
 
+class PaperInfo(BaseModel):
+    title: str = Field(description="Title of the paper")
+    summary: str = Field(description="Summary of the paper, in 3 lines")
+    examples: list[str] = Field(
+        description="Relevant examples aiding comprehension, taken from the paper, if there are."
+    )
+    topic: str = Field(description="Topic of the paper")
+
+
+class PapersResponse(BaseModel):
+    category_id: Category = Field(description="The category requested.")
+    papers: list[PaperInfo] = Field(
+        description="List of papers retrieved with all the info"
+    )
+
+
 question_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_QUESTION,
     result_type=GeneralResponse,
     tools=[
-        Tool(query_articles_list, takes_ctx=False),
+        Tool(search_articles, takes_ctx=False),
         Tool(get_article, takes_ctx=False),
     ],
 )
@@ -46,9 +62,10 @@ question_agent = Agent(
 summary_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_SUMMARY,
-    result_type=CategoryResponse,
+    result_type=PapersResponse,
     tools=[
         Tool(choose_category, takes_ctx=False),
-        Tool(query_recent_articles, takes_ctx=False),
+        Tool(retrieve_recent_articles, takes_ctx=False),
+        Tool(get_article, takes_ctx=False),
     ],
 )
