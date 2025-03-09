@@ -2,9 +2,9 @@ import json
 
 import gradio as gr
 import nest_asyncio
-from pydantic_ai.messages import ToolCallPart, ToolReturnPart
+from pydantic_ai.messages import ToolCallPart
 
-from src.agent import agent
+from src.agents import question_agent
 
 nest_asyncio.apply()
 
@@ -12,7 +12,7 @@ nest_asyncio.apply()
 def messages_from_agent(prompt: str, chatbot: list[dict], past_messages: list):
 
     chatbot.append({"role": "user", "content": prompt})
-    result = agent.run_sync(prompt, message_history=past_messages)
+    result = question_agent.run_sync(prompt, message_history=past_messages)
     for message in result.new_messages():
         for call in message.parts:
             if isinstance(call, ToolCallPart):
@@ -62,17 +62,18 @@ def select_data(message: gr.SelectData) -> str:
 with gr.Blocks() as demo:
     gr.HTML(
         """
-<div style="display: flex; justify-content: center; align-items: center; gap: 2rem; padding: 1rem; width: 100%">
-    <img src="https://ai.pydantic.dev/img/logo-white.svg" style="max-width: 200px; height: auto">
-    <div>
-        <h1 style="margin: 0 0 1rem 0">Arxiv Assistant</h1>
-        <h3 style="margin: 0 0 0.5rem 0">
-            This assistant answer your questions about Arxiv papers.
-        </h3>
-    </div>
-</div>
-"""
+        <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; padding: 1rem; width: 100%">
+            <img src="https://ai.pydantic.dev/img/logo-white.svg" style="max-width: 200px; height: auto">
+            <div>
+                <h1 style="margin: 0 0 1rem 0">Arxiv Assistant</h1>
+                <h3 style="margin: 0 0 0.5rem 0">
+                    This assistant answer your questions about Arxiv papers.
+                </h3>
+            </div>
+        </div>
+        """
     )
+
     past_messages = gr.State([])
     chatbot = gr.Chatbot(
         label="Packing Assistant",
