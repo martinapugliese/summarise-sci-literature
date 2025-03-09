@@ -1,14 +1,21 @@
+import httpx
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent, Tool
+from pydantic_ai import Agent, RunContext, Tool
 
 from constants import GEMINI_2_FLASH_MODEL_ID
-from prompts import SYSTEM_PROMPT_QUESTION, SYSTEM_PROMPT_SUMMARY
+from prompts import (
+    SYSTEM_PROMPT_ORCHESTRATOR,
+    SYSTEM_PROMPT_QUESTION,
+    SYSTEM_PROMPT_SUMMARY,
+)
 from tools import (
     choose_category,
     get_article,
     retrieve_recent_articles,
     search_articles,
 )
+
+# TODO remove useless pydntic models
 
 
 class GeneralResponse(BaseModel):
@@ -49,15 +56,10 @@ class PapersResponse(BaseModel):
     )
 
 
-question_agent = Agent(
-    GEMINI_2_FLASH_MODEL_ID,
-    system_prompt=SYSTEM_PROMPT_QUESTION,
-    result_type=GeneralResponse,
-    tools=[
-        Tool(search_articles, takes_ctx=False),
-        Tool(get_article, takes_ctx=False),
-    ],
-)
+class Context(BaseModel):
+    # no input required
+    pass
+
 
 summary_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
@@ -69,3 +71,31 @@ summary_agent = Agent(
         Tool(get_article, takes_ctx=False),
     ],
 )
+
+question_agent = Agent(
+    GEMINI_2_FLASH_MODEL_ID,
+    system_prompt=SYSTEM_PROMPT_QUESTION,
+    result_type=GeneralResponse,
+    tools=[
+        Tool(search_articles, takes_ctx=False),
+        Tool(get_article, takes_ctx=False),
+    ],
+)
+
+orchestrator_agent = Agent(
+    GEMINI_2_FLASH_MODEL_ID,
+    system_prompt=SYSTEM_PROMPT_ORCHESTRATOR,
+    result_type=PapersResponse | GeneralResponse,
+)
+
+
+@orchestrator_agent.tool
+async def summarise_latest_papers(ctx: RunContext[Context], prompt: str) -> list[str]:
+    r = await summary_agent.run(prompt)
+    return r
+
+
+@orchestrator_agent.tool
+async def answer_question(ctx: RunContext[Context], prompt: str) -> list[str]:
+    r = await question_agent.run(prompt)
+    return r
