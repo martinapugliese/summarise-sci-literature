@@ -4,7 +4,7 @@ import gradio as gr
 import nest_asyncio
 from pydantic_ai.messages import ToolCallPart
 
-from src.agents import GeneralResponse, PapersResponse, orchestrator_agent
+from agents import GeneralResponse, PapersResponse, orchestrator_agent
 
 nest_asyncio.apply()
 
@@ -35,7 +35,7 @@ def messages_from_agent(prompt: str, chatbot: list[dict], past_messages: list):
     response = result.data
 
     if isinstance(response, GeneralResponse):
-        text_reponse = response.response
+        text_response = response.response
 
     elif isinstance(response, PapersResponse):
         papers = response.papers

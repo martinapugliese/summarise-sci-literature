@@ -1,5 +1,7 @@
 from agents import orchestrator_agent, question_agent, summary_agent
 
+# THIS IS ONLY FOR LOCAL TESTING
+
 # TMP - prmpt fpr summaries
 # prompt = """Find the most recent papers about AI."""
 prompt = """What are the most recent papers published about reinforcement learning?"""
