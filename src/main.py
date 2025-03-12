@@ -1,4 +1,11 @@
-from agents import orchestrator_agent, question_agent, summary_agent
+from pydantic_ai.usage import UsageLimits
+
+from agents import (
+    general_question_agent,
+    orchestrator_agent,
+    question_agent,
+    summary_agent,
+)
 
 # THIS IS ONLY FOR LOCAL TESTING
 
@@ -12,12 +19,20 @@ prompt = """What are the most recent papers published about reinforcement learni
 # prompt = "How good is AI at playing chess?"
 prompt = "Has anyone solved the Goldbach conjecture?"
 
+# geenral question prompts
+prompt = "What is reinforcement learning?"
+# prompt = "What is a general relativity?"
+
 
 def main():
 
     # result = summary_agent.run_sync(prompt)
     # result = question_agent.run_sync(prompt)
-    result = orchestrator_agent.run_sync(prompt)
+    # result = orchestrator_agent.run_sync(prompt)
+    result = general_question_agent.run_sync(
+        prompt,
+        # usage_limits=UsageLimits(request_limit=3),
+    )
     print(result)
 
     return result

@@ -42,7 +42,7 @@ def search_articles(
         prefix: how to interpret the query. Possible values:
             - ti (saarch by title)
             - au (search by author)
-            - abs (search in the abstracts)
+            - abs (search by match in the abstract)
             - co (search in the comments)
             - jr (search by journal reference)
             - cat (search by subject category)
@@ -58,7 +58,10 @@ def search_articles(
 
     search_query = f"{prefix}:{query}"
 
+    # TODO edit to combine query params with AND/OR/ANDNOT
+
     # TODO this can keep searching forever, handle this
+    # TODO address when API returns no results
     url = (
         f"{base_url}search_query={search_query}&start={start}&max_results={max_results}"
     )

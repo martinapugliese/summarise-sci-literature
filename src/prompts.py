@@ -14,7 +14,7 @@ SYSTEM_PROMPT_ORCHESTRATOR = cleandoc(
 
 SYSTEM_PROMPT_SUMMARY = cleandoc(
     """
-    You are an expert in understanding academic topics,  using the arXiv API
+    You are an expert in understanding academic topics, using the arXiv API
     and distilling key information from papers in a way that is understandable and clear.
 
     Answer the question by first finding the best matching arXiv category for the request
@@ -32,6 +32,29 @@ SYSTEM_PROMPT_SUMMARY = cleandoc(
     e.g. cognitive science, medicine, foundational AI etc.
     """
 )
+
+SYSTEM_PROMPT_GENERAL_QUESTION = cleandoc(
+    """
+    You are an experienced user of the arXiv API, you can run a query and
+    find relevant papers to answer a question.
+
+    These are the relevant query parameters you can use to query:
+    - ti: search by title
+    - au: search by author
+    - abs: search by match in the abstract
+    - cat: search by subject category
+    - all: use all the above
+
+    The abstract is called a "summary" in the API response.
+
+    Answer the question by choosing the most appropriate query parameters to search for papers
+    and then reading the abstracts to produce the answer to the question.
+
+    Return whether you found relevant information or not and the reason.
+    Also return the answer if you found it.
+    """
+)
+
 
 # TODO better wau to tell it not to search forever
 SYSTEM_PROMPT_QUESTION = cleandoc(

@@ -4,6 +4,7 @@ from pydantic_ai import Agent, RunContext, Tool
 
 from constants import GEMINI_2_FLASH_MODEL_ID
 from prompts import (
+    SYSTEM_PROMPT_GENERAL_QUESTION,
     SYSTEM_PROMPT_ORCHESTRATOR,
     SYSTEM_PROMPT_QUESTION,
     SYSTEM_PROMPT_SUMMARY,
@@ -20,6 +21,22 @@ from tools import (
 
 class GeneralResponse(BaseModel):
     response: str = Field(description="The response to the query or question asked")
+    article_list: list[str] = Field(
+        description="The list of articles urls you used to answer to the question."
+    )
+
+
+class GeneralQuestionResponse(BaseModel):
+    response: str = Field(description="The response to the question asked")
+    query_string: str = Field(
+        description="The query string used to search for the articles in the API"
+    )
+    found_relevant_info: bool = Field(
+        description="Whether you found relevant information or not"
+    )
+    reason: str = Field(
+        description="The reason why you found relevant information or not"
+    )
     article_list: list[str] = Field(
         description="The list of articles urls you used to answer to the question."
     )
@@ -70,6 +87,13 @@ summary_agent = Agent(
         Tool(retrieve_recent_articles, takes_ctx=False),
         Tool(get_article, takes_ctx=False),
     ],
+)
+
+general_question_agent = Agent(
+    GEMINI_2_FLASH_MODEL_ID,
+    system_prompt=SYSTEM_PROMPT_GENERAL_QUESTION,
+    result_type=GeneralQuestionResponse,
+    tools=[Tool(search_articles, takes_ctx=False)],
 )
 
 question_agent = Agent(
