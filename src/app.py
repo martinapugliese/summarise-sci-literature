@@ -3,8 +3,9 @@ import json
 import gradio as gr
 import nest_asyncio
 from pydantic_ai.messages import ToolCallPart
+from pydantic_ai.usage import UsageLimits
 
-from agents import GeneralResponse, PapersResponse, orchestrator_agent
+from agents import PapersListResponse, QuestionAnswerResponse, orchestrator_agent
 
 nest_asyncio.apply()
 
@@ -12,7 +13,12 @@ nest_asyncio.apply()
 def messages_from_agent(prompt: str, chatbot: list[dict], past_messages: list):
 
     chatbot.append({"role": "user", "content": prompt})
-    result = orchestrator_agent.run_sync(prompt, message_history=past_messages)
+    # TODO needs error handling
+    result = orchestrator_agent.run_sync(
+        prompt,
+        message_history=past_messages,
+        usage_limits=UsageLimits(request_limit=10),
+    )
     for message in result.new_messages():
         for call in message.parts:
             if isinstance(call, ToolCallPart):
@@ -34,10 +40,10 @@ def messages_from_agent(prompt: str, chatbot: list[dict], past_messages: list):
 
     response = result.data
 
-    if isinstance(response, GeneralResponse):
+    if isinstance(response, QuestionAnswerResponse):
         text_response = response.response
 
-    elif isinstance(response, PapersResponse):
+    elif isinstance(response, PapersListResponse):
         papers = response.papers
         text_response = ""
         for paper in papers:
