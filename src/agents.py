@@ -1,3 +1,5 @@
+from typing import Literal
+
 import httpx
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext, Tool
@@ -8,20 +10,18 @@ from prompts import (
     SYSTEM_PROMPT_QUESTION,
     SYSTEM_PROMPT_SUMMARY,
 )
-from tools import (
-    choose_category,
-    get_article,
-    retrieve_recent_articles,
-    search_articles,
-)
+from tools import choose_category, get_article, retrieve_recent_papers, search_papers
 
 # TODO remove useless pydntic models
 
 
-class GeneralResponse(BaseModel):
-    response: str = Field(description="The response to the query or question asked")
-    article_list: list[str] = Field(
-        description="The list of articles urls you used to answer to the question."
+class QuestionAnswerResponse(BaseModel):
+    response: str = Field(description="The response to the question")
+    papers_list: list[str] = Field(
+        description="The list of papers urls you used to answer to the question."
+    )
+    source: Literal["abstracts", "papers"] = Field(
+        description="Whether you found the answer in the abstracts or in the whole papers."
     )
 
 
@@ -35,8 +35,8 @@ class CategoryResponse(BaseModel):
     category_name: Category = Field(
         description="The category name of the topic requested."
     )
-    article_list: list[str] = Field(
-        description="The list of articles responding to the request."
+    PapersListResponse_list: list[str] = Field(
+        description="The list of papers responding to the request."
     )
 
 
@@ -49,7 +49,7 @@ class PaperInfo(BaseModel):
     topic: str = Field(description="Topic of the paper")
 
 
-class PapersResponse(BaseModel):
+class PapersListResponse(BaseModel):
     category_id: Category = Field(description="The category requested.")
     papers: list[PaperInfo] = Field(
         description="List of papers retrieved with all the info"
@@ -64,10 +64,10 @@ class Context(BaseModel):
 summary_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_SUMMARY,
-    result_type=PapersResponse,
+    result_type=PapersListResponse,
     tools=[
         Tool(choose_category, takes_ctx=False),
-        Tool(retrieve_recent_articles, takes_ctx=False),
+        Tool(retrieve_recent_papers, takes_ctx=False),
         Tool(get_article, takes_ctx=False),
     ],
     model_settings={"max_tokens": 1000, "temperature": 0},
@@ -76,9 +76,9 @@ summary_agent = Agent(
 question_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_QUESTION,
-    result_type=GeneralResponse,
+    result_type=QuestionAnswerResponse,
     tools=[
-        Tool(search_articles, takes_ctx=False),
+        Tool(search_papers, takes_ctx=False),
         Tool(get_article, takes_ctx=False),
     ],
     model_settings={"max_tokens": 1000, "temperature": 0},
@@ -87,7 +87,7 @@ question_agent = Agent(
 orchestrator_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_ORCHESTRATOR,
-    result_type=PapersResponse | GeneralResponse,
+    result_type=PapersListResponse | QuestionAnswerResponse,
     model_settings={"max_tokens": 1000, "temperature": 0},
 )
 
