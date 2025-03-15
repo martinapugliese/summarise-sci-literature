@@ -1,4 +1,5 @@
 import logging
+import time
 from io import BytesIO
 
 import feedparser
@@ -18,7 +19,7 @@ def choose_category(topic: str):
 
 
 # TODO this and next could be collated into one function
-def search_articles(
+def search_papers(
     query: str = "cs.AI",
     sortby: str = "submittedDate",
     prefix: str = "cat",
@@ -26,8 +27,8 @@ def search_articles(
     max_results: int = 20,
 ):
     """
-    Search articles on arXiv according to the query value.
-    It returns a markdown table with 20 articles and the following values:
+    Search papers on arXiv according to the query value.
+    It returns a markdown table with 20 papers and the following values:
     - pdf: the url to the article pdf
     - updated: the last time the article was updated
     - published: the date when the article was published
@@ -54,8 +55,9 @@ def search_articles(
 
     # TODO not sure this uses anything more than cat search
 
-    base_url = "http://export.arxiv.org/api/query?"
+    time.sleep(0.5)
 
+    base_url = "http://export.arxiv.org/api/query?"
     search_query = f"{prefix}:{query}"
 
     # TODO this can keep searching forever, handle this
@@ -67,25 +69,25 @@ def search_articles(
 
     res = requests.get(url, timeout=360)
     if not res.ok:
-        articles = "No Results"
+        papers = "No Results"
     else:
-        articles = feedparser.parse(res.content)["entries"]
-        articles = pd.DataFrame(articles)[
+        papers = feedparser.parse(res.content)["entries"]
+        papers = pd.DataFrame(papers)[
             ["id", "updated", "published", "title", "summary"]
         ]
-        articles.id = articles.id.apply(lambda s: s.replace("/abs/", "/pdf/"))
-        articles = articles.to_markdown(index=False)
+        papers.id = papers.id.apply(lambda s: s.replace("/abs/", "/pdf/"))
+        papers = papers.to_markdown(index=False)
 
     markdown = f"""
         ---{query}-{sortby}----
-        {articles}
+        {papers}
         ------------------------
     """
 
     return markdown
 
 
-def retrieve_recent_articles(
+def retrieve_recent_papers(
     category: str = "cs.AI",
 ):
     base_url = "http://export.arxiv.org/api/query?"
@@ -97,18 +99,16 @@ def retrieve_recent_articles(
 
     response = requests.get(url, timeout=360)
     if not response.ok:
-        df_articles = pd.DataFrame()  # no results, TODO needs to be handled
+        df_papers = pd.DataFrame()  # no results, TODO needs to be handled
     else:
-        articles_list = feedparser.parse(response.content)["entries"]
-        df_articles = pd.DataFrame(articles_list)[
+        papers_list = feedparser.parse(response.content)["entries"]
+        df_papers = pd.DataFrame(papers_list)[
             ["id", "published", "title"]
         ]  # cols are from the Atom feed
-        print(df_articles)
-        df_articles["url"] = df_articles["id"].apply(
-            lambda s: s.replace("/abs/", "/pdf/")
-        )
+        # print(df_papers)
+        df_papers["url"] = df_papers["id"].apply(lambda s: s.replace("/abs/", "/pdf/"))
 
-    return df_articles.to_markdown(index=False)
+    return df_papers.to_markdown(index=False)
 
 
 async def get_article(url: str) -> str:
