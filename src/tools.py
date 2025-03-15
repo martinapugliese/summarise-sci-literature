@@ -75,6 +75,7 @@ def search_papers(
         papers = pd.DataFrame(papers)[
             ["id", "updated", "published", "title", "summary"]
         ]
+        papers = papers.rename(columns={"summary": "abstract"})
         papers.id = papers.id.apply(lambda s: s.replace("/abs/", "/pdf/"))
         papers = papers.to_markdown(index=False)
 

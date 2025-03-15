@@ -6,6 +6,7 @@ from pydantic_ai import Agent, RunContext, Tool
 
 from constants import GEMINI_2_FLASH_MODEL_ID
 from prompts import (
+    PROMPT_QUESTION,
     SYSTEM_PROMPT_ORCHESTRATOR,
     SYSTEM_PROMPT_QUESTION,
     SYSTEM_PROMPT_SUMMARY,
@@ -93,12 +94,28 @@ orchestrator_agent = Agent(
 
 
 @orchestrator_agent.tool
-async def summarise_latest_papers(ctx: RunContext[Context], prompt: str) -> list[str]:
-    r = await summary_agent.run(prompt)
+async def summarise_latest_papers(ctx: RunContext[Context], request: str) -> list[str]:
+    """
+    Make a request to an agent about the most recent paper in a specific field.
+
+    Args:
+        ctx: the context
+        request: the request
+    """
+    r = await summary_agent.run(request)
     return r
 
 
 @orchestrator_agent.tool
-async def answer_question(ctx: RunContext[Context], prompt: str) -> list[str]:
+async def answer_question(ctx: RunContext[Context], question: str) -> list[str]:
+    """
+    Ask an agent to search on Arxiv and access some papers to answer a question.
+
+    Args:
+        ctx: the context
+        question: the question
+    """
+
+    prompt = PROMPT_QUESTION.format(question=question)
     r = await question_agent.run(prompt)
     return r
