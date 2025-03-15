@@ -70,6 +70,7 @@ summary_agent = Agent(
         Tool(retrieve_recent_articles, takes_ctx=False),
         Tool(get_article, takes_ctx=False),
     ],
+    model_settings={"max_tokens": 1000, "temperature": 0},
 )
 
 question_agent = Agent(
@@ -80,12 +81,14 @@ question_agent = Agent(
         Tool(search_articles, takes_ctx=False),
         Tool(get_article, takes_ctx=False),
     ],
+    model_settings={"max_tokens": 1000, "temperature": 0},
 )
 
 orchestrator_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_ORCHESTRATOR,
     result_type=PapersResponse | GeneralResponse,
+    model_settings={"max_tokens": 1000, "temperature": 0},
 )
 
 

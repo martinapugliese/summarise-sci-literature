@@ -11,6 +11,7 @@ prompt = """What are the most recent papers published about reinforcement learni
 # prompt = """What is the relation between context length and accuracy for large language models?"""
 # prompt = "How good is AI at playing chess?"
 prompt = "Has anyone solved the Goldbach conjecture?"
+prompt = "What is reinforcement learning?"
 
 
 def main():
@@ -19,6 +20,7 @@ def main():
     # result = question_agent.run_sync(prompt)
     result = orchestrator_agent.run_sync(prompt)
     print(result)
+    print(result.all_messages())
 
     return result
 
