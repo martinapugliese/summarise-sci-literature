@@ -1,22 +1,20 @@
-import httpx
+from typing import Literal
+
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext, Tool
 
 from constants import GEMINI_2_FLASH_MODEL_ID
 from prompts import (
-    SYSTEM_PROMPT_GENERAL_QUESTION,
-    SYSTEM_PROMPT_ORCHESTRATOR,
-    SYSTEM_PROMPT_QUESTION,
-    SYSTEM_PROMPT_SUMMARY,
+    SYSTEM_PROMPT_ABSTRACTS,
+    SYSTEM_PROMPT_ORCHESTRATOR_QUESTION,
+    SYSTEM_PROMPT_PAPERS,
 )
 from tools import (
     choose_category,
-    get_article,
+    get_articles,
     retrieve_recent_articles,
-    search_articles,
+    search_articles_new,
 )
-
-# TODO remove useless pydntic models
 
 
 class GeneralResponse(BaseModel):
@@ -78,48 +76,108 @@ class Context(BaseModel):
     pass
 
 
-summary_agent = Agent(
+# summary_agent = Agent(
+#     GEMINI_2_FLASH_MODEL_ID,
+#     system_prompt=SYSTEM_PROMPT_SUMMARY,
+#     result_type=PapersResponse,
+#     tools=[
+#         Tool(choose_category, takes_ctx=False),
+#         Tool(retrieve_recent_articles, takes_ctx=False),
+#         Tool(get_article, takes_ctx=False),
+#     ],
+# )
+
+# abstract_researcher_agent = Agent(
+#     GEMINI_2_FLASH_MODEL_ID,
+#     system_prompt=SYSTEM_PROMPT_GENERAL_QUESTION,
+#     model_settings={"max_tokens": 200, "temperature": 0},
+#     result_type=GeneralQuestionResponse,
+#     tools=[Tool(search_articles, takes_ctx=False)],
+# )
+
+# deeper_agent = Agent(
+#     GEMINI_2_FLASH_MODEL_ID,
+#     system_prompt=SYSTEM_PROMPT_QUESTION,
+#     model_settings={"max_tokens": 200, "temperature": 0},
+#     result_type=GeneralResponse,
+#     tools=[
+#         Tool(search_articles, takes_ctx=False),
+#         Tool(get_article, takes_ctx=False),
+#     ],
+# )
+
+# orchestrator_agent = Agent(
+#     GEMINI_2_FLASH_MODEL_ID,
+#     system_prompt=SYSTEM_PROMPT_ORCHESTRATOR,
+#     model_settings={"max_tokens": 200, "temperature": 0},
+#     result_type=PapersResponse | GeneralResponse,
+# )
+
+
+# @orchestrator_agent.tool
+# async def summarise_latest_papers(ctx: RunContext[Context], prompt: str) -> list[str]:
+#     r = await summary_agent.run(prompt)
+#     return r
+
+
+# @orchestrator_agent.tool
+# async def answer_question(ctx: RunContext[Context], prompt: str) -> list[str]:
+#     r = await deeper_agent.run(prompt)
+#     return r
+
+
+class Answer(BaseModel):
+    question: str = Field(description="The question asked")
+    answer: str = Field(description="The answer to question", default=None)
+    source: Literal["abstracts", "papers"] = Field(
+        description="The source of the answer, either abstracts or papers", default=None
+    )
+    api_query: str = Field(
+        description="The query string used to search for papers via the arXiv API",
+        default=None,
+    )
+    article_urls: list[str] = Field(
+        description="The list of papers URLs whose abstract you used to answer to the question.",
+        default=[],
+    )
+
+
+question_orchestrator_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
-    system_prompt=SYSTEM_PROMPT_SUMMARY,
-    result_type=PapersResponse,
+    system_prompt=SYSTEM_PROMPT_ORCHESTRATOR_QUESTION,
+    model_settings={"max_tokens": 1000, "temperature": 0},
+    result_type=Answer,
+)
+
+
+abstract_researcher_agent = Agent(
+    GEMINI_2_FLASH_MODEL_ID,
+    system_prompt=SYSTEM_PROMPT_ABSTRACTS,
+    model_settings={"max_tokens": 200, "temperature": 0},
+    result_type=Answer,
+    tools=[Tool(search_articles_new, takes_ctx=False)],
+)
+
+paper_researcher_agent = Agent(
+    GEMINI_2_FLASH_MODEL_ID,
+    system_prompt=SYSTEM_PROMPT_PAPERS,
+    model_settings={"max_tokens": 200, "temperature": 0},
+    result_type=Answer,
     tools=[
-        Tool(choose_category, takes_ctx=False),
-        Tool(retrieve_recent_articles, takes_ctx=False),
-        Tool(get_article, takes_ctx=False),
+        Tool(get_articles, takes_ctx=False),
     ],
 )
 
-general_question_agent = Agent(
-    GEMINI_2_FLASH_MODEL_ID,
-    system_prompt=SYSTEM_PROMPT_GENERAL_QUESTION,
-    result_type=GeneralQuestionResponse,
-    tools=[Tool(search_articles, takes_ctx=False)],
-)
 
-question_agent = Agent(
-    GEMINI_2_FLASH_MODEL_ID,
-    system_prompt=SYSTEM_PROMPT_QUESTION,
-    result_type=GeneralResponse,
-    tools=[
-        Tool(search_articles, takes_ctx=False),
-        Tool(get_article, takes_ctx=False),
-    ],
-)
-
-orchestrator_agent = Agent(
-    GEMINI_2_FLASH_MODEL_ID,
-    system_prompt=SYSTEM_PROMPT_ORCHESTRATOR,
-    result_type=PapersResponse | GeneralResponse,
-)
-
-
-@orchestrator_agent.tool
-async def summarise_latest_papers(ctx: RunContext[Context], prompt: str) -> list[str]:
-    r = await summary_agent.run(prompt)
+@question_orchestrator_agent.tool
+async def get_response_from_abstracts(
+    ctx: RunContext[Context], prompt: str
+) -> list[str]:
+    r = await abstract_researcher_agent.run(prompt)
     return r
 
 
-@orchestrator_agent.tool
-async def answer_question(ctx: RunContext[Context], prompt: str) -> list[str]:
-    r = await question_agent.run(prompt)
+@question_orchestrator_agent.tool
+async def gen_response_from_papers(ctx: RunContext[Context], prompt: str) -> list[str]:
+    r = await paper_researcher_agent.run(prompt)
     return r

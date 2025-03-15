@@ -1,4 +1,5 @@
 import logging
+import time
 from io import BytesIO
 
 import feedparser
@@ -88,6 +89,41 @@ def search_articles(
     return markdown
 
 
+def search_articles_new(
+    query: str = "cs.AI",
+    start: int = 0,
+):
+
+    # TODO not sure this uses anything more than cat search
+    time.sleep(0.5)  # this is to try staying within rate limits for free tier
+
+    base_url = "http://export.arxiv.org/api/query?"
+    search_query = f"cat:{query}"
+
+    url = f"{base_url}search_query={search_query}&start={start}&max_results=20"
+    url += f"&sortBy=relevance&sortOrder=descending"
+    print("*** url:", url)
+
+    res = requests.get(url, timeout=360)
+    if not res.ok:
+        articles = "No Results"
+    else:
+        articles = feedparser.parse(res.content)["entries"]
+        articles = pd.DataFrame(articles)[
+            ["id", "published", "updated", "authors", "title", "summary"]
+        ]
+        articles.id = articles.id.apply(lambda s: s.replace("/abs/", "/pdf/"))
+        articles = articles.to_markdown(index=False)
+
+    markdown = f"""
+        ---{query}---
+        {articles}
+        ------------------------
+    """
+
+    return markdown
+
+
 def retrieve_recent_articles(
     category: str = "cs.AI",
 ):
@@ -114,31 +150,35 @@ def retrieve_recent_articles(
     return df_articles.to_markdown(index=False)
 
 
-async def get_article(url: str) -> str:
+async def get_articles(urls: list[str]) -> str:
     """
     Opens an article using its URL (PDF version) and returns its text content.
     Args:
         url: the article arXiv URL
     """
 
-    print("**** article url:", url)
+    d_articles = {}
+    for url in urls:
 
-    res = requests.get(url, timeout=360)
-    if not res.ok:
-        article = "Not Found"
+        print("**** article url:", url)
+        res = requests.get(url, timeout=360)
+        if not res.ok:
+            article_content = "Not Found"
 
-    else:
-        bytes_stream = BytesIO(res.content)
-        try:
-            with pymupdf.open(stream=bytes_stream) as doc:
-                article = chr(12).join([page.get_text() for page in doc])
-        except pymupdf.FileDataError:
-            article = "Not Found"
+        else:
+            bytes_stream = BytesIO(res.content)
+            try:
+                with pymupdf.open(stream=bytes_stream) as doc:
+                    article_content = chr(12).join([page.get_text() for page in doc])
+            except pymupdf.FileDataError:
+                article_content = "Not Found"
 
-    article = f"""
-        -------{url}------------
-        {article}
-        ------END----------------
-    """
+        d_articles[
+            url
+        ] = f"""
+            -------{url}------------
+            {article_content}
+            ------END----------------
+        """
 
-    return article
+    return d_articles
