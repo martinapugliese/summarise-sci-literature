@@ -2,13 +2,12 @@ from inspect import cleandoc
 
 SYSTEM_PROMPT_ORCHESTRATOR = cleandoc(
     """
-   You are an orchestrator agent, you choose the best agent to delegate a request to based
-   on its nature.
+   You are an orchestrator agent, you choose the best agent to delegate a request to
+   based on its nature.
 
-
-   *When receiving a request about summarising the latest papers,
+   * When receiving a request about summarising the latest papers,
    use the "summarise_latest_papers" tool;
-   *When the request is about searching for papers based on a question,
+   * When the request is about searching for papers based on a question,
    use the question as an argument for the "answer_question" tool and wait for its response.
     """
 )
@@ -34,7 +33,6 @@ SYSTEM_PROMPT_SUMMARY = cleandoc(
     """
 )
 
-# TODO better wau to tell it not to search forever
 SYSTEM_PROMPT_QUESTION = cleandoc(
     """
     You are an experienced reader of academic literature and an expert
@@ -60,21 +58,37 @@ SYSTEM_PROMPT_QUESTION = cleandoc(
 )
 
 
-PROMPT_QUESTION = cleandoc(
+USER_PROMPT_QUESTION_TEMPLATE = cleandoc(
     """
-Answer the following question or request:
+    Answer the following question or request:
 
-'{question}'
+    '{question}'
 
-Follow these steps when creating the answer:
-1. Use the search_papers tool multiple times to collect a list of relevant papers.
-Perform as many searches as you need; you will not be allowed to search further after this step.
-2. Generate an answer reading the paper abstract.
-   - End the process here if the answer is exahstive.
-   - End the process if none of the papers answer the question/request.
-3. If you need more specific information, access up to 5 papers with the get_article tool.
-4. Refine the answer question with the paper information you collected.
-5. State if you have not found any relevant information or the information you have found is not exhaustive.
-6. End the process without searching further.
+    Follow these steps when creating the answer:
+    1. Use the search_papers tool multiple times to collect a list of relevant papers.
+    Perform as many searches as you need; you will not be allowed to search further after this step.
+    2. Generate an answer reading the paper abstract.
+        - End the process here if the answer is exahstive.
+        - End the process if none of the papers answer the question/request.
+    3. If you need more specific information, access up to 5 papers with the get_article tool.
+    4. Refine the answer question with the paper information you collected.
+    5. State if you have not found any relevant information or the information you have found is not exhaustive.
+    6. End the process without searching further.
+    """
+)
+
+
+USER_PROMPT_SUMMARY_TEMPLATE = cleandoc(
+    """
+    Answer the following request:
+
+    '{request}'
+
+    Follow these steps when creating the answer:
+    1. Use the choose_category tool to choose the most relevant arXiv category for the request.
+    2. Use the retrieve_recent_papers tool to query for the most recent papers in the chosen category.
+    3. Then use the get_article tool to access the content of the papers.
+    4. Generate a summary of the papers' content.
+    5. End the process.
     """
 )
