@@ -6,8 +6,9 @@ from pydantic_ai import Agent, RunContext, Tool
 
 from constants import GEMINI_2_FLASH_MODEL_ID
 from prompts import (  # SYSTEM_PROMPT_QUESTION,; SYSTEM_PROMPT_SUMMARY,
-    GENERAL_SYSTEM_PROMPT,
     SYSTEM_PROMPT_ORCHESTRATOR,
+    SYSTEM_PROMPT_QUESTION,
+    SYSTEM_PROMPT_SUMMARY,
     USER_PROMPT_QUESTION_TEMPLATE,
     USER_PROMPT_SUMMARY_TEMPLATE,
 )
@@ -63,7 +64,7 @@ class Context(BaseModel):
 
 summary_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
-    system_prompt=GENERAL_SYSTEM_PROMPT,
+    system_prompt=SYSTEM_PROMPT_SUMMARY,
     result_type=PapersListResponse,
     tools=[
         Tool(choose_category, takes_ctx=False),
@@ -75,7 +76,7 @@ summary_agent = Agent(
 
 question_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
-    system_prompt=GENERAL_SYSTEM_PROMPT,
+    system_prompt=SYSTEM_PROMPT_QUESTION,
     result_type=QuestionAnswerResponse,
     tools=[
         Tool(search_papers, takes_ctx=False),
