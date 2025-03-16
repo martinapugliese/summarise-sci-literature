@@ -15,7 +15,7 @@ question = """Find the most recent papers about AI"""
 # question = "Has anyone solved the Goldbach conjecture?"
 # question = "What is reinforcement learning?"
 # question = "Tell me about the needle-in-a-haystack method to investigate capabilities of LLMs"
-question = "Is Gemini better than other LLMs?"
+# question = "Is Gemini better than other LLMs?"
 
 
 def main():
