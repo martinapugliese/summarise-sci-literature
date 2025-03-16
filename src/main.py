@@ -11,9 +11,9 @@ question = """Find the most recent papers about AI"""
 
 # TMP - prpmpt for questions
 # question= """What is the relation between context length and accuracy for large language models?"""
-# prompt = "How good is AI at playing chess?"
-# prompt = "Has anyone solved the Goldbach conjecture?"
-# prompt = "What is reinforcement learning?"
+# question = "How good is AI at playing chess?"
+# question = "Has anyone solved the Goldbach conjecture?"
+# question = "What is reinforcement learning?"
 # question = "Tell me about the needle-in-a-haystack method to investigate capabilities of LLMs"
 question = "Is Gemini better than other LLMs?"
 

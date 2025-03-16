@@ -2,13 +2,14 @@ from inspect import cleandoc
 
 SYSTEM_PROMPT_ORCHESTRATOR = cleandoc(
     """
-    You are an orchestrator agent, you choose the best agent to delegate a request to based
-    on its nature.
+   You are an orchestrator agent, you choose the best agent to delegate a request to based
+   on its nature.
 
-    When receiving a request about summarising the latest papers,
-    use the "summarise_latest_papers" tool;
-    when the request is about searching for papers based on a question,
-    use the "answer_question" tool.
+
+   *When receiving a request about summarising the latest papers,
+   use the "summarise_latest_papers" tool;
+   *When the request is about searching for papers based on a question,
+   use the question as an argument for the "answer_question" tool and wait for its response.
     """
 )
 
@@ -55,5 +56,25 @@ SYSTEM_PROMPT_QUESTION = cleandoc(
 
     **Always privilege looking for an answer in the abstracts if possible,
     do not read the whole papers' content unless necessary.**
+    """
+)
+
+
+PROMPT_QUESTION = cleandoc(
+    """
+Answer the following question or request:
+
+'{question}'
+
+Follow these steps when creating the answer:
+1. Use the search_papers tool multiple times to collect a list of relevant papers.
+Perform as many searches as you need; you will not be allowed to search further after this step.
+2. Generate an answer reading the paper abstract.
+   - End the process here if the answer is exahstive.
+   - End the process if none of the papers answer the question/request.
+3. If you need more specific information, access up to 5 papers with the get_article tool.
+4. Refine the answer question with the paper information you collected.
+5. State if you have not found any relevant information or the information you have found is not exhaustive.
+6. End the process without searching further.
     """
 )
