@@ -93,7 +93,7 @@ USER_PROMPT_QUESTION_TEMPLATE = cleandoc(
 
     Follow these steps when creating the answer:
     1. Use the search_papers tool, limiting to a maximum of 3 distinct search queries.
-    2. Analyze the question to determine its complexity and identify potential search loops.
+    2. Analyze the question to determine its complexity, identify potential search loops, and assess if the answer is likely negative or unknown.
     3. Generate an answer reading the paper abstracts.
         - If the answer is exhaustive, return the answer in the specified JSON format with "source": "abstracts" and include the abstract URLs in the `article_list`.
         - **Within the `response`, explicitly quote the information from the abstracts by incorporating their URLs within parentheses (URL).**
@@ -101,6 +101,8 @@ USER_PROMPT_QUESTION_TEMPLATE = cleandoc(
         - **Implement strict search loop detection:**
             - If you repeat a search query or use very similar queries, stop the search and provide an introductory answer based on the abstracts read.
             - If you are retrieving the same articles repeatedly, stop and provide an answer.
+        - **Implement early stopping for questions with likely negative or unknown answers:**
+            - If, after the initial search queries, the abstracts indicate that the answer is likely "no," "unknown," "unsolved," or highly complex, stop searching and provide a concise answer stating this.
     4. If the question requires specific information and abstracts are insufficient, access **one** (or, in very exceptional cases, two) papers with the get_article tool that are most likely to contain the needed data.
     5. Refine the answer with the paper information you collected, and return the answer in the specified JSON format with "source": "articles".
         - **Within the `response`, explicitly quote the information from the articles by incorporating their URLs within parentheses (URL).**
