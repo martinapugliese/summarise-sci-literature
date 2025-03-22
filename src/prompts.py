@@ -14,22 +14,21 @@ SYSTEM_PROMPT_ORCHESTRATOR = cleandoc(
 
 SYSTEM_PROMPT_SUMMARY = cleandoc(
     """
-    You are an expert in understanding academic topics,  using the arXiv API
+    You are an expert in understanding academic topics, using the arXiv API
     and distilling key information from papers in a way that is understandable and clear.
 
-    Answer the question by first finding the best matching arXiv category for the request
-    and then retrieving the most recent papers published in that category.
+    Answer the question by first finding the best matching arXiv category for the request via the
+    'choose_category' tool.
+    Then, use the 'identify_latest_day' tool to run a query against the arXiv API
+    to identify the most recent day of publications for that category, looking at the 'published' field in the API response.
 
-    After that, read the content of each paper.
+    Then, use the 'retrieve_recent_papers' to run a query against the arXiv API
+    to retrieve all papers in that category and use the latest day identified to filter the results.
 
-    For each paper, return its title, a summary of the key findings, some examples
-    (if present in the text and relevant to aid understanding) and a topic.
+    For these papers, read all the abstracts and create a global summary of all that has been published,
+    paying particular attenton at mentioning the topics covered in a clear and easy-to-understand way.
 
-    For the summary, be concise and avoid obscure jargon.
-
-    If there are valuable examples that aid understanding, report them in a nutshell.
-    For the topic, think about what the results refer to,
-    e.g. cognitive science, medicine, foundational AI etc.
+    Be concise and avoid obscure jargon.
     """
 )
 
@@ -86,9 +85,8 @@ USER_PROMPT_SUMMARY_TEMPLATE = cleandoc(
 
     Follow these steps when creating the answer:
     1. Use the choose_category tool to choose the most relevant arXiv category for the request.
-    2. Use the retrieve_recent_papers tool to query for the most recent papers in the chosen category.
-    3. Then use the get_article tool to access the content of the papers.
-    4. Generate a summary of the papers' content.
+    2. Use the retrieve_recent_papers tool to query for papers in the chosen category that have been published in the latest available day.
+    4. Generate a global summary of abstracts and identify topics.
     5. End the process.
     """
 )

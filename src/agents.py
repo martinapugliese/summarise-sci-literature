@@ -12,9 +12,13 @@ from prompts import (  # SYSTEM_PROMPT_QUESTION,; SYSTEM_PROMPT_SUMMARY,
     USER_PROMPT_QUESTION_TEMPLATE,
     USER_PROMPT_SUMMARY_TEMPLATE,
 )
-from tools import choose_category, get_article, retrieve_recent_papers, search_papers
-
-# TODO remove useless pydntic models
+from tools import (
+    choose_category,
+    get_article,
+    identify_latest_day,
+    retrieve_recent_papers,
+    search_papers,
+)
 
 
 class QuestionAnswerResponse(BaseModel):
@@ -30,16 +34,6 @@ class QuestionAnswerResponse(BaseModel):
 class Category(BaseModel):
     category_id: str = Field(description="The category ID of the topic requested.")
     category_name: str = Field(description="The category name of the topic requested.")
-
-
-class CategoryResponse(BaseModel):
-    category_id: Category = Field(description="The category id of the topic requested.")
-    category_name: Category = Field(
-        description="The category name of the topic requested."
-    )
-    PapersListResponse_list: list[str] = Field(
-        description="The list of papers responding to the request."
-    )
 
 
 class PaperInfo(BaseModel):
@@ -58,6 +52,16 @@ class PapersListResponse(BaseModel):
     )
 
 
+class SummaryResponse(BaseModel):
+    category: Category = Field(description="The category of the papers.")
+    latest_published_day: str = Field(
+        description="The latest day of publications available on the API."
+    )
+    summary: str = Field(
+        description="Global summary of all abstracts, identifying topics."
+    )
+
+
 class Context(BaseModel):
     pass
 
@@ -65,11 +69,11 @@ class Context(BaseModel):
 summary_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_SUMMARY,
-    result_type=PapersListResponse,
+    result_type=SummaryResponse,
     tools=[
         Tool(choose_category, takes_ctx=False),
+        Tool(identify_latest_day, takes_ctx=False),
         Tool(retrieve_recent_papers, takes_ctx=False),
-        Tool(get_article, takes_ctx=False),
     ],
     model_settings={"max_tokens": 1000, "temperature": 0},
 )
@@ -88,7 +92,7 @@ question_agent = Agent(
 orchestrator_agent = Agent(
     GEMINI_2_FLASH_MODEL_ID,
     system_prompt=SYSTEM_PROMPT_ORCHESTRATOR,
-    result_type=PapersListResponse | QuestionAnswerResponse,
+    result_type=SummaryResponse | QuestionAnswerResponse,
     model_settings={"max_tokens": 1000, "temperature": 0},
 )
 

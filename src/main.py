@@ -11,7 +11,7 @@ question = """Find the most recent papers about AI"""
 
 # TMP - prpmpt for questions
 # question= """What is the relation between context length and accuracy for large language models?"""
-question = "How good is AI at playing chess?"
+# question = "How good is AI at playing chess?"
 # question = "Has anyone solved the Goldbach conjecture?"
 # question = "What is reinforcement learning?"
 # question = "Tell me about the needle-in-a-haystack method to investigate capabilities of LLMs"
@@ -24,7 +24,7 @@ def main():
     # result = question_agent.run_sync(prompt)
     result = orchestrator_agent.run_sync(
         question,
-        usage_limits=UsageLimits(request_limit=10),  # limit to 10 requests
+        usage_limits=UsageLimits(request_limit=20),  # limit to 10 requests
     )
     print(result)
     # print(result.all_messages())   # doesn't look like you can print the messages one at a time, only at the end
