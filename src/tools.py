@@ -46,37 +46,27 @@ def identify_latest_day(category: str = "cs.AI"):
 
 
 def search_papers(
-    query: str = "cs.AI",
+    query: str = "biology",
     sortby: str = "submittedDate",
-    prefix: str = "cat",
     start: int = 0,
     max_results: int = 20,
 ):
     """
-    Search papers on arXiv according to the query value.
-    It returns a markdown table with 20 papers and the following values:
+    Search papers on arXiv according to the query value in the text context of the article abstracts.
+    It returns a markdown table with max_results papers and the following values:
     - pdf: the url to the article pdf
     - updated: the last time the article was updated
     - published: the date when the article was published
     - title: the article title
-    - summary: a summary of the article content
+    - summary: a summary of the article's content
     Args:
         query: the query used for the search
         sortby: how to sort the results. Possible values:
             - relevance (most relevant on the top)
             - lastUpdatedDate (most recently updated on the top)
             - submittedDate (most recently submitted on top)
-        prefix: how to interpret the query. Possible values:
-            - ti (saarch by title)
-            - au (search by author)
-            - abs (search in the abstracts)
-            - co (search in the comments)
-            - jr (search by journal reference)
-            - cat (search by subject category)
-            - rn (seach by report number)
-            - all (use all the above)
         start: the index of the ranking where the table starts, add +20 to get the next table chunk
-        max_results: the total number of papers to retrieve. Default value is 20.
+        max_results: the total number of papers to retrieve. The default value is 20.
     """
 
     # TODO not sure this uses anything more than cat search
@@ -84,7 +74,7 @@ def search_papers(
     time.sleep(0.5)
 
     base_url = "http://export.arxiv.org/api/query?"
-    search_query = f"{prefix}:{query}"
+    search_query = f"abs:{query.lower()}"
 
     # TODO this can keep searching forever, handle this
     url = (

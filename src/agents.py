@@ -23,11 +23,11 @@ from tools import (
 
 class QuestionAnswerResponse(BaseModel):
     response: str = Field(description="The response to the question")
-    papers_list: list[str] = Field(
-        description="The list of papers urls you used to answer to the question."
+    article_list: list[str] = Field(
+        description="The list of abstract/article urls you used to answer to the question."
     )
-    source: Literal["abstracts", "papers"] = Field(
-        description="Whether you found the answer in the abstracts or in the whole papers."
+    source: Literal["abstracts", "articles"] = Field(
+        description="Whether you found the answer in the abstracts or in the whole articles."
     )
 
 

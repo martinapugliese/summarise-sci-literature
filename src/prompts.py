@@ -40,19 +40,47 @@ SYSTEM_PROMPT_QUESTION = cleandoc(
     Answer a question by first performing the most relevant search on arXiv and
     reading the abstracts of the papers found.
 
-    If the some (or all) the abstracts respond to the question, return the answer.
-    Otherwise, select only the most promising papers from the list access
-    and their whole content to search for the answer within.
+    **Limit searches to a maximum of 3 distinct search queries.**
+    **Limit article access to a maximum of 2 articles.**
 
-    Quote the papers you used to answer.
+    **Prioritize providing a concise overview of the answer using abstracts.**
+    **Only access articles if the abstracts are insufficient to answer the question, or to provide specific data.**
 
-    If you don't find the answer, say you did not find relevant information
-    and terminate your generation.
+    **Implement strict search loop detection:**
+    - If the model repeats a search query or uses very similar queries, stop the search and provide an introductory answer based on the abstracts read.
+    - If the model is retrieving the same articles repeatedly, stop and provide an answer.
+
+    If the some (or all) the abstracts respond to the question *comprehensively*, return the answer in the following JSON format:
+    {
+        "response": "The answer to the question.",
+        "article_list": ["url1", "url2", ...],
+        "source": "abstracts"
+    }
+
+    Otherwise, if the abstracts provide *some* information, and you need to access full articles, select only the **single most promising** paper (or at most two in very specific cases) from the list and use its content to complete the answer. Return the answer in the following JSON format:
+    {
+        "response": "The answer to the question.",
+        "article_list": ["url1", "url2", ...],
+        "source": "articles"
+    }
+
+    If you find that the search space is too broad or the question leads to an endless search for comparisons and details, provide a concise introductory answer and indicate that the topic has many facets.
+
+    **Always include the URLs of the abstracts or articles used in the `article_list`.**
+    **Within the `response`, explicitly quote the information from the articles or abstracts by incorporating their URLs within parentheses (URL).**
+
+    If you don't find the answer, say you did not find relevant information and terminate your generation,
+    returning the following JSON format:
+    {
+        "response": "I did not find relevant information.",
+        "article_list": [],
+        "source": "abstracts"
+    }
 
     **Do not try to answer the question yourself.**
 
     **Always privilege looking for an answer in the abstracts if possible,
-    do not read the whole papers' content unless necessary.**
+    do not read the whole papers' content unless absolutely necessary.**
     """
 )
 
@@ -64,15 +92,21 @@ USER_PROMPT_QUESTION_TEMPLATE = cleandoc(
     '{question}'
 
     Follow these steps when creating the answer:
-    1. Use the search_papers tool multiple times to collect a list of relevant papers.
-    Perform as many searches as you need; you will not be allowed to search further after this step.
-    2. Generate an answer reading the paper abstract.
-        - End the process here if the answer is exahstive.
-        - End the process if none of the papers answer the question/request.
-    3. If you need more specific information, access up to 5 papers with the get_article tool.
-    4. Refine the answer question with the paper information you collected.
-    5. State if you have not found any relevant information or the information you have found is not exhaustive.
-    6. End the process without searching further.
+    1. Use the search_papers tool, limiting to a maximum of 3 distinct search queries.
+    2. Analyze the question to determine its complexity and identify potential search loops.
+    3. Generate an answer reading the paper abstracts.
+        - If the answer is exhaustive, return the answer in the specified JSON format with "source": "abstracts" and include the abstract URLs in the `article_list`.
+        - **Within the `response`, explicitly quote the information from the abstracts by incorporating their URLs within parentheses (URL).**
+        - If none of the papers answer the question/request, return the JSON format indicating no relevant information was found, and end the process.
+        - **Implement strict search loop detection:**
+            - If you repeat a search query or use very similar queries, stop the search and provide an introductory answer based on the abstracts read.
+            - If you are retrieving the same articles repeatedly, stop and provide an answer.
+    4. If the question requires specific information and abstracts are insufficient, access **one** (or, in very exceptional cases, two) papers with the get_article tool that are most likely to contain the needed data.
+    5. Refine the answer with the paper information you collected, and return the answer in the specified JSON format with "source": "articles".
+        - **Within the `response`, explicitly quote the information from the articles by incorporating their URLs within parentheses (URL).**
+    6. If, during the process, it becomes apparent that the search is leading to an endless loop of comparisons or overly broad details, provide a concise introductory answer highlighting the complexity of the topic and indicating that there are many directions to explore.
+    7. If you have not found any relevant information or the information you have found is not exhaustive, state that in the response.
+    8. End the process without searching further.
     """
 )
 
