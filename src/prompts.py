@@ -50,6 +50,9 @@ SYSTEM_PROMPT_QUESTION = cleandoc(
     - If the model repeats a search query or uses very similar queries, stop the search and provide an introductory answer based on the abstracts read.
     - If the model is retrieving the same articles repeatedly, stop and provide an answer.
 
+    **Implement aggressive early stopping for questions with likely negative or unknown answers:**
+    - If, after the *first* search query, the abstracts indicate that the answer is likely "no," "unknown," "unsolved," "open problem," or highly complex, immediately stop searching and provide a concise answer stating this.
+
     If the some (or all) the abstracts respond to the question *comprehensively*, return the answer in the following JSON format:
     {
         "response": "The answer to the question.",
@@ -87,7 +90,7 @@ SYSTEM_PROMPT_QUESTION = cleandoc(
 
 USER_PROMPT_QUESTION_TEMPLATE = cleandoc(
     """
-    Answer the following question or request:
+     Answer the following question or request:
 
     '{question}'
 
@@ -101,8 +104,11 @@ USER_PROMPT_QUESTION_TEMPLATE = cleandoc(
         - **Implement strict search loop detection:**
             - If you repeat a search query or use very similar queries, stop the search and provide an introductory answer based on the abstracts read.
             - If you are retrieving the same articles repeatedly, stop and provide an answer.
-        - **Implement early stopping for questions with likely negative or unknown answers:**
-            - If, after the initial search queries, the abstracts indicate that the answer is likely "no," "unknown," "unsolved," or highly complex, stop searching and provide a concise answer stating this.
+        - **Implement aggressive early stopping for questions with likely negative or unknown answers:**
+            - If, after the *first* search query, the abstracts indicate that the answer is likely "no," "unknown," "unsolved," "open problem," or highly complex, immediately stop searching and provide a concise answer stating this.
+        - **Implement immediate termination if no suitable information is found:**
+            - If, after performing 3 distinct search queries, you cannot find a clear and concise answer to the question using abstracts, STOP IMMEDIATELY.
+            - RETURN ONLY this response: "I could not find the requested information."
     4. If the question requires specific information and abstracts are insufficient, access **one** (or, in very exceptional cases, two) papers with the get_article tool that are most likely to contain the needed data.
     5. Refine the answer with the paper information you collected, and return the answer in the specified JSON format with "source": "articles".
         - **Within the `response`, explicitly quote the information from the articles by incorporating their URLs within parentheses (URL).**
