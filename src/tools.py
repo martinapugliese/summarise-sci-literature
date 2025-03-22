@@ -18,7 +18,33 @@ def choose_category(topic: str):
     return categories
 
 
-# TODO this and next could be collated into one function
+def identify_latest_day(category: str = "cs.AI"):
+    """
+    Identify the latest day available on the arXiv API in the given category
+    """
+
+    base_url = "http://export.arxiv.org/api/query?"
+
+    search_query = f"cat:{category}"
+    url = f"{base_url}search_query={search_query}&start=0&max_results=1"
+    url += f"&sortBy=submittedDate&sortOrder=descending"
+
+    print("*** DAY url:", url)
+
+    res = requests.get(url, timeout=360)
+    if not res.ok:
+        latest_day = "Not Found"
+    else:
+        # remove the time part
+        latest_day = feedparser.parse(res.content)["entries"][0]["published"].split(
+            "T"
+        )[0]
+
+    print("*** latest day:", latest_day)
+
+    return latest_day
+
+
 def search_papers(
     query: str = "cs.AI",
     sortby: str = "submittedDate",
@@ -90,12 +116,13 @@ def search_papers(
 
 def retrieve_recent_papers(
     category: str = "cs.AI",
+    latest_day: str = "2022-01-01",
 ):
     base_url = "http://export.arxiv.org/api/query?"
 
     search_query = f"cat:{category}"
-    url = f"{base_url}search_query={search_query}&start=0&max_results=5"  # TODO make it pull up until it reaches max for day?
-    url += f"&sortBysubmittedDate&sortOrder=descending"
+    url = f"{base_url}search_query={search_query}&start=0&max_results=300"
+    url += f"&sortBy=submittedDate&sortOrder=descending"
     print("*** url:", url)
 
     response = requests.get(url, timeout=360)
@@ -104,10 +131,13 @@ def retrieve_recent_papers(
     else:
         papers_list = feedparser.parse(response.content)["entries"]
         df_papers = pd.DataFrame(papers_list)[
-            ["id", "published", "title"]
+            ["id", "published", "title", "summary"]
         ]  # cols are from the Atom feed
-        # print(df_papers)
-        df_papers["url"] = df_papers["id"].apply(lambda s: s.replace("/abs/", "/pdf/"))
+        df_papers = df_papers.rename(columns={"summary": "abstract"})
+
+    # remove time part from published and cut to latest day (string)
+    df_papers["published"] = df_papers["published"].apply(lambda s: s.split("T")[0])
+    df_papers = df_papers[df_papers["published"] == latest_day]
 
     return df_papers.to_markdown(index=False)
 
