@@ -92,12 +92,13 @@ USER_PROMPT_QUESTION_TEMPLATE = cleandoc(
     Follow these steps when creating the answer:
     1. Use the search_papers tool, limiting to a maximum of 3 distinct search queries.
     2. Analyze the question to determine its complexity and identify potential search loops.
-    3. Generate an answer reading the paper abstracts.
+    3. Generate an answer reading the article abstracts.
         - If the answer is exhaustive, return the answer in the specified JSON format with "source": "abstracts" and include the abstract URLs in the `article_list`, and end the process.
         - If none of the papers answer the question/request, return the JSON format indicating no relevant information was found, and end the process.
         - If you notice a pattern of repeated or very similar search queries, stop the search and provide an introductory answer based on the abstracts you have read.
+        - In any case, quote the abstract URLs you used to answer also in the answer itself.
     4. If the question requires specific information and abstracts are insufficient, access **one** (or, in very exceptional cases, two) papers with the get_article tool that are most likely to contain the needed data.
-    5. Refine the answer with the paper information you collected, and return the answer in the specified JSON format with "source": "articles".
+    5. Refine the answer with the paper information you collected, and return the answer in the specified JSON format with "source": "articles". Quote the paper URLs in the answer itself.
     6. If, during the process, it becomes apparent that the search is leading to an endless loop of comparisons or overly broad details, provide a concise introductory answer highlighting the complexity of the topic and indicating that there are many directions to explore.
     7. If you have not found any relevant information or the information you have found is not exhaustive, state that in the response.
     8. End the process without searching further.

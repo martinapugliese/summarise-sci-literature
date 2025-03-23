@@ -19,6 +19,9 @@ question = "Has anyone solved the Goldbach conjecture?"
 # question="what happens when you account for electron interference in Josephson junctions?"
 
 question_list = [
+    "Find the most recent papers about AI",
+    "What are the most recent papers published about reinforcement learning?",
+    "What are the most recent papers published about neutrinos?",
     "What is reinforcement learning?",
     "What is the relation between context length and accuracy for large language models?",
     "How good is AI at playing chess?",
@@ -35,6 +38,10 @@ def main():
     # result = summary_agent.run_sync(prompt)
     # result = question_agent.run_sync(prompt)
     for question in question_list:
+
+        print("|-------------------------|")
+        print("Question:", question)
+
         result = orchestrator_agent.run_sync(
             question,
             usage_limits=UsageLimits(request_limit=20),  # limit to 10 requests
