@@ -45,15 +45,15 @@ def identify_latest_day(category: str = "cs.AI"):
     return latest_day
 
 
-def search_papers(
-    query: str = "biology",
+def search_articles(
+    query: str = "lyapunov exponents",
     sortby: str = "submittedDate",
     start: int = 0,
     max_results: int = 20,
 ):
     """
-    Search papers on arXiv according to the query value in the text context of the article abstracts.
-    It returns a markdown table with max_results papers and the following values:
+    Search articles on arXiv according to the query value in the text context of the article abstracts.
+    It returns a markdown table with max_results articles and the following values:
     - pdf: the url to the article pdf
     - updated: the last time the article was updated
     - published: the date when the article was published
@@ -66,17 +66,14 @@ def search_papers(
             - lastUpdatedDate (most recently updated on the top)
             - submittedDate (most recently submitted on top)
         start: the index of the ranking where the table starts, add +20 to get the next table chunk
-        max_results: the total number of papers to retrieve. The default value is 20.
+        max_results: the total number of articles to retrieve. The default value is 20.
     """
-
-    # TODO not sure this uses anything more than cat search
 
     time.sleep(0.5)
 
     base_url = "http://export.arxiv.org/api/query?"
     search_query = f"abs:{query.lower()}"
 
-    # TODO this can keep searching forever, handle this
     url = (
         f"{base_url}search_query={search_query}&start={start}&max_results={max_results}"
     )
@@ -85,26 +82,26 @@ def search_papers(
 
     res = requests.get(url, timeout=360)
     if not res.ok:
-        papers = "No Results"
+        articles = "No Results"
     else:
-        papers = feedparser.parse(res.content)["entries"]
-        papers = pd.DataFrame(papers)[
+        articles = feedparser.parse(res.content)["entries"]
+        articles = pd.DataFrame(articles)[
             ["id", "updated", "published", "title", "summary"]
         ]
-        papers = papers.rename(columns={"summary": "abstract"})
-        papers.id = papers.id.apply(lambda s: s.replace("/abs/", "/pdf/"))
-        papers = papers.to_markdown(index=False)
+        articles = articles.rename(columns={"summary": "abstract"})
+        articles.id = articles.id.apply(lambda s: s.replace("/abs/", "/pdf/"))
+        articles = articles.to_markdown(index=False)
 
     markdown = f"""
         ---{query}-{sortby}----
-        {papers}
+        {articles}
         ------------------------
     """
 
     return markdown
 
 
-def retrieve_recent_papers(
+def retrieve_recent_articles(
     category: str = "cs.AI",
     latest_day: str = "2022-01-01",
 ):
@@ -117,19 +114,19 @@ def retrieve_recent_papers(
 
     response = requests.get(url, timeout=360)
     if not response.ok:
-        df_papers = pd.DataFrame()  # no results, TODO needs to be handled
+        df_articles = pd.DataFrame()  # no results, TODO needs to be handled
     else:
-        papers_list = feedparser.parse(response.content)["entries"]
-        df_papers = pd.DataFrame(papers_list)[
+        articles_list = feedparser.parse(response.content)["entries"]
+        df_articles = pd.DataFrame(articles_list)[
             ["id", "published", "title", "summary"]
         ]  # cols are from the Atom feed
-        df_papers = df_papers.rename(columns={"summary": "abstract"})
+        df_articles = df_articles.rename(columns={"summary": "abstract"})
 
     # remove time part from published and cut to latest day (string)
-    df_papers["published"] = df_papers["published"].apply(lambda s: s.split("T")[0])
-    df_papers = df_papers[df_papers["published"] == latest_day]
+    df_articles["published"] = df_articles["published"].apply(lambda s: s.split("T")[0])
+    df_articles = df_articles[df_articles["published"] == latest_day]
 
-    return df_papers.to_markdown(index=False)
+    return df_articles.to_markdown(index=False)
 
 
 async def get_article(url: str) -> str:

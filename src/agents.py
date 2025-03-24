@@ -16,8 +16,8 @@ from tools import (
     choose_category,
     get_article,
     identify_latest_day,
-    retrieve_recent_papers,
-    search_papers,
+    retrieve_recent_articles,
+    search_articles,
 )
 
 
@@ -36,24 +36,24 @@ class Category(BaseModel):
     category_name: str = Field(description="The category name of the topic requested.")
 
 
-class PaperInfo(BaseModel):
-    title: str = Field(description="Title of the paper")
-    summary: str = Field(description="Summary of the paper, in 3 lines")
+class ArticleInfo(BaseModel):
+    title: str = Field(description="Title of the article")
+    summary: str = Field(description="Summary of the article, in 3 lines")
     examples: list[str] = Field(
-        description="Relevant examples aiding comprehension, taken from the paper, if there are."
+        description="Relevant examples aiding comprehension, taken from the article, if there are."
     )
-    topic: str = Field(description="Topic of the paper")
+    topic: str = Field(description="Topic of the article")
 
 
-class PapersListResponse(BaseModel):
+class ArticlesListResponse(BaseModel):
     category_id: Category = Field(description="The category requested.")
-    papers: list[PaperInfo] = Field(
-        description="List of papers retrieved with all the info"
+    article: list[ArticleInfo] = Field(
+        description="List of article retrieved with all the info"
     )
 
 
 class SummaryResponse(BaseModel):
-    category: Category = Field(description="The category of the papers.")
+    category: Category = Field(description="The category of the articles.")
     latest_published_day: str = Field(
         description="The latest day of publications available on the API."
     )
@@ -73,7 +73,7 @@ summary_agent = Agent(
     tools=[
         Tool(choose_category, takes_ctx=False),
         Tool(identify_latest_day, takes_ctx=False),
-        Tool(retrieve_recent_papers, takes_ctx=False),
+        Tool(retrieve_recent_articles, takes_ctx=False),
     ],
     model_settings={"max_tokens": 1000, "temperature": 0},
 )
@@ -83,7 +83,7 @@ question_agent = Agent(
     system_prompt=SYSTEM_PROMPT_QUESTION,
     result_type=QuestionAnswerResponse,
     tools=[
-        Tool(search_papers, takes_ctx=False),
+        Tool(search_articles, takes_ctx=False),
         Tool(get_article, takes_ctx=False),
     ],
     model_settings={"max_tokens": 1000, "temperature": 0},
@@ -98,7 +98,9 @@ orchestrator_agent = Agent(
 
 
 @orchestrator_agent.tool
-async def summarise_latest_papers(ctx: RunContext[Context], request: str) -> list[str]:
+async def summarise_latest_articles(
+    ctx: RunContext[Context], request: str
+) -> list[str]:
     """
     Make a request to an agent about the most recent paper in a specific field.
     Args:
@@ -113,7 +115,7 @@ async def summarise_latest_papers(ctx: RunContext[Context], request: str) -> lis
 @orchestrator_agent.tool
 async def answer_question(ctx: RunContext[Context], question: str) -> list[str]:
     """
-    Ask an agent to search on arXiv and access papers to answer a question.
+    Ask an agent to search on arXiv and access articles to answer a question.
     Args:
         ctx: the context
         question: the question
