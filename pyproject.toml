@@ -9,16 +9,16 @@ build-backend = "setuptools.build_meta"
 name = "sci-summarizer"
 version = "0.0.1"
 dependencies = [
-  "pydantic",
-  "pydantic-ai",
-  "requests",
-  "beautifulsoup4",
-  "pandas",
-  "lxml",
-  "tabulate",
-  "pymupdf",
-  "feedparser",
-  "gradio"
+  "pydantic==2.10.6",
+  "pydantic-ai==0.0.44",
+  "requests==2.32.3",
+  "beautifulsoup4==4.13.3",
+  "pandas==2.2.3",
+  "tabulate==0.9.0",
+  "pymupdf==1.25.3",
+  "feedparser==6.0.11",
+  "asyncio==3.4.3",
+  "nest-asyncio==1.6.0"
 ]
 requires-python = ">=3.11"
 

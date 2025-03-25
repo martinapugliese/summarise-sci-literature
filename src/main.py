@@ -1,6 +1,12 @@
+import asyncio
+import time
+
+import nest_asyncio
 from pydantic_ai.usage import UsageLimits
 
 from agents import orchestrator_agent, question_agent, summary_agent
+
+nest_asyncio.apply()  # Allows nesting of event loops
 
 # THIS IS ONLY FOR LOCAL TESTING
 
@@ -18,27 +24,20 @@ question_list = [
 ]
 
 
-def main():
-    import time
+async def main():
 
-    # result = summary_agent.run_sync(prompt)
-    # result = question_agent.run_sync(prompt)
     for question in question_list:
 
         print("|-------------------------|")
         print("Question:", question)
 
-        result = orchestrator_agent.run_sync(
+        result = await orchestrator_agent.run(
             question,
             usage_limits=UsageLimits(request_limit=20),  # limit to 10 requests
         )
         print(result)
         time.sleep(15)
 
-    # print(result.all_messages())   # doesn't look like you can print the messages one at a time, only at the end
-
-    return result
-
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
