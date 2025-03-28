@@ -2,6 +2,7 @@ import asyncio
 import time
 
 import nest_asyncio
+from pydantic_ai.exceptions import ModelHTTPError
 from pydantic_ai.usage import UsageLimits
 
 from agents import orchestrator_agent, question_agent, summary_agent
@@ -25,18 +26,25 @@ question_list = [
 
 
 async def main():
-
     for question in question_list:
-
         print("|-------------------------|")
         print("Question:", question)
 
-        result = await orchestrator_agent.run(
-            question,
-            usage_limits=UsageLimits(request_limit=20),  # limit to 10 requests
-        )
-        print(result)
-        time.sleep(15)
+        attempts = 0
+        max_attempts = 10
+
+        while attempts < max_attempts:
+            try:
+                result = await orchestrator_agent.run(
+                    question,
+                    usage_limits=UsageLimits(request_limit=20),  # limit to 10 requests
+                )
+                print(result)
+                break
+            except ModelHTTPError:
+                print("Exception has occurred (ModelHTTPError) waiting 60 seconds")
+                time.sleep(60)
+                attempts += 1
 
 
 if __name__ == "__main__":
