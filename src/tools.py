@@ -129,26 +129,36 @@ def retrieve_recent_articles(
     return df_articles.to_markdown(index=False)
 
 
-async def get_article(url: str) -> str:
+def get_article(url: str, max_attempts: int = 10) -> str:
     """
     Opens an article using its URL (PDF version) and returns its text content.
     Args:
         url: the article arXiv URL
+        max_attempts: the maximum number of attempts to open the article. Default is 10. Do not change this parameter.
     """
 
     print("**** article url:", url)
 
-    res = requests.get(url, timeout=360)
-    if not res.ok:
-        article = "Not Found"
+    attempts = 0
+    article = ""
 
-    else:
-        bytes_stream = BytesIO(res.content)
+    while attempts < max_attempts:
         try:
-            with pymupdf.open(stream=bytes_stream) as doc:
-                article = chr(12).join([page.get_text() for page in doc])
-        except pymupdf.FileDataError:
-            article = "Not Found"
+            res = requests.get(url, timeout=360)
+            if not res.ok:
+                article = "Not Found"
+            else:
+                bytes_stream = BytesIO(res.content)
+                try:
+                    with pymupdf.open(stream=bytes_stream) as doc:
+                        article = chr(12).join([page.get_text() for page in doc])
+                except pymupdf.FileDataError:
+                    article = "Not Found"
+                break
+        except requests.exceptions.ConnectionError:
+            print("ConnectionError occurred. Retrying in 60 seconds...")
+            time.sleep(60)
+            attempts += 1
 
     article = f"""
         -------{url}------------
