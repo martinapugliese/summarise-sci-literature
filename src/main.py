@@ -2,7 +2,6 @@ import asyncio
 import time
 
 import nest_asyncio
-from pydantic_ai.exceptions import ModelHTTPError
 from pydantic_ai.usage import UsageLimits
 
 from agents import orchestrator_agent, question_agent, summary_agent
@@ -41,8 +40,9 @@ async def main():
                 )
                 print(result)
                 break
-            except ModelHTTPError:
-                print("Exception has occurred (ModelHTTPError) waiting 60 seconds")
+            except Exception as e:
+                print("Exception has occurred", e)
+                print("Waiting 60 seconds")
                 time.sleep(60)
                 attempts += 1
 
