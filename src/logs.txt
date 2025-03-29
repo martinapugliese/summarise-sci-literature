@@ -1,0 +1,43 @@
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to find latest available day: http://export.arxiv.org/api/query?search_query=cat:math.GR&start=0&max_results=1&sortBy=submittedDate&sortOrder=descending
+INFO:tools:Latest available day: 2025-03-27
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to retrieve recent articles: http://export.arxiv.org/api/query?search_query=cat:math.GR&start=0&max_results=300&sortBy=submittedDate&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to find latest available day: http://export.arxiv.org/api/query?search_query=cat:math.GR&start=0&max_results=1&sortBy=submittedDate&sortOrder=descending
+INFO:tools:Latest available day: 2025-03-27
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to retrieve recent articles: http://export.arxiv.org/api/query?search_query=cat:math.GR&start=0&max_results=300&sortBy=submittedDate&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to search articles: http://export.arxiv.org/api/query?search_query=abs:llm intelligence&start=0&max_results=20&sortBy=relevance&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to search articles: http://export.arxiv.org/api/query?search_query=abs:llm general intelligence&start=0&max_results=20&sortBy=relevance&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to search articles: http://export.arxiv.org/api/query?search_query=abs:llm artificial general intelligence&start=0&max_results=20&sortBy=relevance&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to retrieve article: http://arxiv.org/pdf/2310.11616v3
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to retrieve article: http://arxiv.org/pdf/2401.17882v2
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to search articles: http://export.arxiv.org/api/query?search_query=abs:llm consciousness&start=0&max_results=20&sortBy=relevance&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to search articles: http://export.arxiv.org/api/query?search_query=abs:llm sentience&start=0&max_results=20&sortBy=relevance&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to search articles: http://export.arxiv.org/api/query?search_query=abs:llm theory of mind&start=0&max_results=20&sortBy=relevance&sortOrder=descending
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to retrieve article: http://arxiv.org/pdf/2310.11616v3
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to retrieve article: http://arxiv.org/pdf/2401.17882v2
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:tools:*** API URL to retrieve article: http://arxiv.org/pdf/2309.07683v3
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
