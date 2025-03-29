@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sci-summarizer"
+name = "arxiv-muse"
 version = "0.0.1"
 dependencies = [
   "pydantic==2.10.6",
